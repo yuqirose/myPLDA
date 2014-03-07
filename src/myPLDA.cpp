@@ -10,6 +10,9 @@
 #include "myPLDA.h"
 using namespace std;
 
+
+
+
 int main() {
 
 	vector<Doc> corpus;
@@ -49,8 +52,38 @@ int main() {
     /** Sampling
      *
      */
+int num_topic = 10; int alpha = 0.1;int beta =0.1;
+
+int num_thread;
+int doc_topic_count[num_doc][num_topic];
+int term_topic_count [num_term][num_topic];
+int topic_count[num_topic];
+
+
+#pragma omp parallel for
+   for (int d = 0 ;  d< 2 ; d++ ){
+	   Doc curr_doc = corpus[d];
+
+	   for(int t = 0 ; t< num_term; t++){
+		   // remove current count
+		   int prob[num_topic];
+		   int sum_prob=0;
+		   for ( int k = 0; k < num_topic ; k++){
+			   prob[k] = (alpha +doc_topic_count[d][k])*(beta + term_topic_count[t][k]);
+			   prob[k]  = prob[k] /(num_topic * beta+ topic_count[k]);
+			   sum_prob += prob[k];
+		   }
+		   // normalize
+		   for ( int k = 0; k < num_topic ; k++){
+			   prob[k] =  prob[k] / sum_prob;
+		   }
+
+	   }
+
+   }
 
 
 
 	return 0;
 }
+
