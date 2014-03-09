@@ -43,46 +43,48 @@ int main() {
     	}
 
     	corpus.push_back(new_doc);
-    	cout << d <<endl;
+//    	cout << d <<endl;
     }
-    cout << "read " << corpus.size() << " Documents";
+    cout << "read " << corpus.size() << " Documents" << endl;;
 
 
 
-    /** Sampling
-     *
-     */
+/** Sampling
+ *
+ */
 int num_topic = 10; int alpha = 0.1;int beta =0.1;
 
 int num_thread;
-int doc_topic_count[num_doc][num_topic];
-int term_topic_count [num_term][num_topic];
-int topic_count[num_topic];
+vector< vector<int> > doc_topic_count(num_doc, vector<int>(num_topic,0));
+vector< vector<int> > term_topic_count(num_doc, vector<int>(num_topic,0));
+vector<int>  topic_count(num_topic, 0);
+
+
+/** initialization
+ *
+ */
+
 
 
 #pragma omp parallel for
-   for (int d = 0 ;  d< 2 ; d++ ){
+   for (int d = 0 ;  d< 1 ; d++ ){
 	   Doc curr_doc = corpus[d];
-
-	   for(int t = 0 ; t< num_term; t++){
-		   // remove current count
-		   int prob[num_topic];
-		   int sum_prob=0;
-		   for ( int k = 0; k < num_topic ; k++){
-			   prob[k] = (alpha +doc_topic_count[d][k])*(beta + term_topic_count[t][k]);
-			   prob[k]  = prob[k] /(num_topic * beta+ topic_count[k]);
-			   sum_prob += prob[k];
-		   }
-		   // normalize
-		   for ( int k = 0; k < num_topic ; k++){
-			   prob[k] =  prob[k] / sum_prob;
-		   }
-
+//		   // remove current count
+	   vector<int> prob(num_topic);
+	   vector<pair<int, int> >::iterator word_count_iter;
+	   vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
+	   for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
+//		   	  cout << word_count_iter ->first << " "<< word_count_iter->second <<endl;
+		    int word = word_count_iter ->first;
+		    int count = word_count_iter ->second;
+		    for (int c = 0; c < count ; c++){
+		    	int topic = curr_doc.Sample_topic (doc_topic_count[d], term_topic_count[word], topic_count,alpha, beta);
+		    	doc_topic_count[d][topic] ++;
+		    	term_topic_count[word][topic]++;
+		    }
 	   }
 
    }
-
-
 
 	return 0;
 }

@@ -8,6 +8,7 @@
 #ifndef DOC_H_
 #define DOC_H_
 
+#define NUM_TOPIC 20;
 # include "myPLDA.h"
 
 using namespace std;
@@ -42,9 +43,11 @@ public:
 
 	vector<pair<int, int> >  Get_bagofwords(){
 			return this->bag_of_words;
-}
+	}
 
 	void Add_pair( int  wordID, int count);
+
+	int Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count, vector <int> topic_count, int alpha, int beta);
 
 
 
