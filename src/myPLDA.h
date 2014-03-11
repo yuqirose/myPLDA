@@ -19,7 +19,7 @@
 #include <vector>
 #include "Doc.h"
 
-#define MAX_TOPIC 20
+#define MAX_THREAD 20
 
 
 
