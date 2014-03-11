@@ -8,7 +8,7 @@
 #ifndef DOC_H_
 #define DOC_H_
 
-#define NUM_TOPIC 20;
+
 # include "myPLDA.h"
 
 using namespace std;

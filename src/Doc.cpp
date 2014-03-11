@@ -26,13 +26,11 @@ void Doc::Add_pair(int wordID, int count){
 }
 
 int Doc::Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count, vector <int> topic_count,int alpha, int beta){  //Sample_topic (int doc_topic_count[][NUM_TOPIC] ,int term_topic_count[][NUM_TOPIC], int topic_count[],int wordID){
-		   int sum_prob=0;
+		   double sum_prob= 0;
 		   int num_topic = doc_topic_count.size();
-		   vector<int > prob(num_topic, 0);
+		   double prob[num_topic];
 
-		   cout<< "num_topic "<< num_topic << endl;
-
-
+//		   cout<< "num_topic"<< num_topic << endl;
 
 		   for ( int k = 0; k < num_topic ; k++){
 			   prob[k] = (alpha +doc_topic_count[k])*(beta + term_topic_count[k]);
@@ -40,11 +38,25 @@ int Doc::Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count
 			   sum_prob += prob[k];
 		   }
 
+
+
 			   // normalize
 		   for ( int k = 0; k < num_topic ; k++){
 			   prob[k] =  prob[k] / sum_prob;
 		   }
 
-   cout << "work" << endl;
+		   // random sample
+		   gsl_rng * r;
+		   unsigned int rand_topic[num_topic];
+		   gsl_ran_multinomial (r, num_topic, 1, prob,rand_topic);
+
+		   cout << "work" << endl;
+
+		   for (int k = 0; k < num_topic; k++){
+			   if (rand_topic[k] ==1)
+				   return k;
+		   }
+
+
    return 1;
 }

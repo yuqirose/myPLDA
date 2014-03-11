@@ -14,8 +14,13 @@
 #include <iostream>
 #include <fstream>
 #include <omp.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #include <vector>
 #include "Doc.h"
+
+#define MAX_TOPIC 20
+
 
 
 #endif /* PARALDA_H_ */]

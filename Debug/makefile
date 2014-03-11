@@ -44,7 +44,7 @@ all: myPLDA
 myPLDA: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MacOS X C++ Linker'
-	g++ -fopenmp  -o "myPLDA" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -fopenmp -lgsl  -o "myPLDA" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
