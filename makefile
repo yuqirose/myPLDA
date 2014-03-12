@@ -4,7 +4,7 @@ VPATH = src
 CC = g++
 DEBUG = -g
 CFLAGS = -fopenmp -Wall -c $(DEBUG)
-LFLAGS = -fopenmp -lgsl -Wall $(DEBUG)
+LFLAGS = -fopenmp -lgsl -lgslcblas -lm -Wall $(DEBUG)
 
 %.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
