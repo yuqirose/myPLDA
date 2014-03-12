@@ -18,7 +18,7 @@ using namespace std;
 int main() {
 
 	vector<Doc> corpus;
-	string fname = "/Users/roseyu/Downloads/DataSet/BagofWords/docword.kos.txt";
+	string fname = "BagofWords/docword.kos.txt";
 	int num_topic = 10; int max_iter = 20;
 
 	int num_doc, num_term, num_word;
