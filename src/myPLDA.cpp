@@ -165,9 +165,19 @@ int main(int argc, char* argv[]) {
 			   term_topic_count[word][topic] += term_topic_thread[t][word][topic] - term_topic_count[word][topic];
 		   }
 
-		   for (int t = 0 ; t< MAX_THREAD ; t++ ){
-			   term_topic_thread[t] = term_topic_count;
+		   // combine the topics
+		   for (int topic = 0; topic < num_topic ;topic++){
+			   topic_count[topic] =0;
+			   for (int word= 0 ; word < num_term; word++)
+				   topic_count[topic] += term_topic_count[word][topic];
 		   }
+
+
+		   for (int t = 0 ; t< MAX_THREAD ; t++ ){
+				topic_thread[t] = topic_count;
+			    term_topic_thread[t] = term_topic_count;
+		   }
+
 	}
 
 	/**
