@@ -10,8 +10,8 @@ LFLAGS = -fopenmp -lgsl -lgslcblas -lm -Wall $(DEBUG)
 	$(CC) -c -o $@ $< $(CFLAGS)
 %.o: %.cc $(DEPS)	
 	$(CC) -c -o $@ $< $(CFLAGS)
-myPLDA : $(OBJS)
-	$(CC) $(LFLAGS) $(OBJS) -o myPLDA
+fastLDA : $(OBJS)
+	$(CC) $(LFLAGS) $(OBJS) -o fastLDA
 clean:
-	\rm *.o *~ myPLDA
+	\rm *.o *~ fastLDA
 
