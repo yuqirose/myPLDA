@@ -15,11 +15,13 @@ using namespace std;
 
 
 
-int main() {
+int main(int argc, char* argv[]) {
 
 	vector<Doc> corpus;
-	string fname = "BagofWords/docword.kos.txt";
-	int num_topic = 10; int max_iter = 20;
+//	string fname = "BagofWords/docword.kos.txt";
+	string fname = argv[1];
+	int max_iter = atoi(argv[2]);
+	int num_topic = atoi(argv[2]);;
 
 	int num_doc, num_term, num_word;
 
@@ -27,6 +29,8 @@ int main() {
 	ifstream bowData(fname.c_str());
     if(bowData.is_open ()){
 		bowData >> num_doc >> num_term >> num_word;
+	    cout << "num_doc: "<<num_doc<<" num_term: "<<num_term <<" num_word: "<< num_word << endl;
+
     }
     else  cout << "Unable to open file";
 
@@ -76,18 +80,19 @@ int main() {
 		corpus[d].Init_random_topic(num_topic);
 	}
 
-	#pragma omp parallel for
-	for (int d = 0 ;  d< 2; d++ ){
+
+	for (int d = 0;  d< num_doc; d++ ){ //NOTE: the array index should be minutes one
 	   Doc curr_doc = corpus[d];
 	   vector<int> prob(num_topic);
 	   vector<pair<int, int> >::iterator word_count_iter;
 	   vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
 
 	   int word_idx = 0;
+
 	   for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
 			int word = word_count_iter ->first;
 			int count = word_count_iter ->second;
-
+//			cout << "wordID:" <<word<< " count: "<<count << endl;
 			for (int c = 0; c < count ; c++){
 				int topic =curr_doc.Get_word_topic(word_idx);
 				doc_topic_count[d][topic]++;
@@ -104,6 +109,7 @@ int main() {
 		topic_thread[t] = topic_count;
 	}
 
+
 //	for ( int k = 0; k < num_topic; k++)
 //		cout << term_topic_count[0][k] <<" ";
 //	cout << endl;
@@ -112,9 +118,10 @@ int main() {
 	/** Sampling
 	 *
 	 */
+
 	for(int iter =0 ; iter < max_iter ; iter ++) {
 		#pragma omp parallel for
-		   for (int d = 0 ;  d< 1 ; d++ ){
+		   for (int d = 0 ;  d< num_doc; d++ ){
 			   Doc curr_doc = corpus[d];
 			   vector<int> prob(num_topic);
 			   vector<pair<int, int> >::iterator word_count_iter;
@@ -140,7 +147,7 @@ int main() {
 						// sample new topic
 						int topic = curr_doc.Sample_topic (doc_topic_count[d], term_topic_thread[tid %MAX_THREAD][word], topic_thread[tid %MAX_THREAD],alpha, beta);
 
-						cout << "topic "<< topic << endl;
+//						cout << "topic "<< topic << endl;
 						curr_doc.Set_word_topic(topic,word_idx);
 						doc_topic_count[d][topic] ++;
 						term_topic_thread[tid %MAX_THREAD][word][topic] ++;
