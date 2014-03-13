@@ -76,6 +76,7 @@ int main() {
 		corpus[d].Init_random_topic(num_topic);
 	}
 
+	#pragma omp parallel for
 	for (int d = 0 ;  d< 2; d++ ){
 	   Doc curr_doc = corpus[d];
 	   vector<int> prob(num_topic);
