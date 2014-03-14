@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 
 	for(int iter =0 ; iter < max_iter ; iter ++) {
 		#pragma omp parallel for
-		   for (int d = 0 ;  d< num_doc; d++ ){
+		   for (int d = 0 ;  d< 10; d++ ){
 			   Doc curr_doc = corpus[d];
 			   vector<int> prob(num_topic);
 			   vector<pair<int, int> >::iterator word_count_iter;
@@ -177,33 +177,37 @@ int main(int argc, char* argv[]) {
 				topic_thread[t] = topic_count;
 			    term_topic_thread[t] = term_topic_count;
 		   }
+		   
+		   
+		   /**
+			* Read out parameters
+			*/
+			vector <int > doc_topic_sum (num_doc,0);
+			#pragma omp parallel for
+			for (int d =0; d< num_doc;d++){
+				for (int k = 0 ; k < num_topic; k++)
+					doc_topic_sum [d] += doc_topic_count [d][k];
+			}
+
+			#pragma omp parallel for
+			for (int d = 0; d< num_doc;d++){
+				for( int k = 0; k < num_topic; k++){
+					Theta[d][k] = doc_topic_count [d][k] /(double)doc_topic_sum [d];
+				}
+			}
+
+			#pragma omp parallel for
+			for (int t= 0; t< num_term; t++){
+				for( int k = 0; k < num_topic; k++){
+					Phi[t][k] = term_topic_count [t][k] /(double) topic_count [k];
+				}
+			}
+
+		   //perplixity 
 
 	}
 
-	/**
-	 * Read out parameters
-	 */
-	vector <int > doc_topic_sum (num_doc,0);
-	#pragma omp parallel for
-	for (int d =0; d< num_doc;d++){
-		for (int k = 0 ; k < num_topic; k++)
-			doc_topic_sum [d] += doc_topic_count [d][k];
-	}
-
-	#pragma omp parallel for
-	for (int d = 0; d< num_doc;d++){
-		for( int k = 0; k < num_topic; k++){
-			Theta[d][k] = doc_topic_count [d][k] /(double)doc_topic_sum [d];
-		}
-	}
-
-	#pragma omp parallel for
-	for (int t= 0; t< num_term; t++){
-		for( int k = 0; k < num_topic; k++){
-			Phi[t][k] = term_topic_count [t][k] /(double) topic_count [k];
-		}
-	}
-
+	
 
 
 		return 0;
