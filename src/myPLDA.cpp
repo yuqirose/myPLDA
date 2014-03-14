@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
     double durations [max_iter];
     std::clock_t start;
 	for(int iter =0 ; iter < max_iter ; iter ++) {
-		cout << "Iter "<<iter << endl;
+		cout << "Iter "<<iter;
 
 		 start = std::clock();
 
@@ -260,6 +260,7 @@ int main(int argc, char* argv[]) {
 		   }
 
 		   durations[iter] = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
+		   cout << " time "<< durations[iter] << endl;
 	}
 
 	/**
