@@ -117,7 +117,7 @@ int main(int argc, char* argv[]) {
 	vector < vector<double> > Theta (num_doc, vector<double>(num_topic,0) );
 	vector < vector<double> > Phi (num_topic, vector<double>(num_term,0) );
 
-	num_doc=20;
+
 	
 	/** initialization
 	 *
@@ -157,17 +157,17 @@ int main(int argc, char* argv[]) {
 	}
 
 	
-
-//	for ( int k = 0; k < num_topic; k++)
-//		cout << term_topic_count[0][k] <<" ";
-//	cout << endl;
-
-
 	/** Sampling
 	 *
 	 */
     double perplexities [max_iter];
+    double durations [max_iter];
+    std::clock_t start;
 	for(int iter =0 ; iter < max_iter ; iter ++) {
+		cout << "Iter "<<iter << endl;
+
+		 start = std::clock();
+
 		/**
 		* Read out parameters
 		*/
@@ -214,8 +214,10 @@ int main(int argc, char* argv[]) {
 						 // be careful with num_thread = 0;
 
 						term_topic_thread[tid %MAX_THREAD][word][old_topic]--;
-						if(term_topic_thread[tid %MAX_THREAD][word][old_topic] <0)
-							cout <<"Error" << endl;
+						if(term_topic_thread[tid %MAX_THREAD][word][old_topic] <0){
+//							cout <<"Error" << " word :"<<word << endl;NOTE: the synchronmization problem
+							term_topic_thread[tid %MAX_THREAD][word][old_topic] = 0;
+						}
 
 						topic_thread[tid %MAX_THREAD][old_topic]--;
 						// sample new topic
@@ -240,12 +242,8 @@ int main(int argc, char* argv[]) {
 					   term_topic_count[word][topic] += term_topic_thread[t][word][topic] ;
 				   }
 				   term_topic_count[word][topic]=term_topic_count[word][topic]+(1- MAX_THREAD)*temp;
-//				   topic_term <<  term_topic_count[word][topic] <<",";
 			   }
-
-//			  topic_term << endl;
 		   }
-//		   topic_term <<endl<<endl;
 
 		   // combine the topics
 		   for (int topic = 0; topic < num_topic ;topic++){
@@ -253,9 +251,7 @@ int main(int argc, char* argv[]) {
 			   for (int word= 0 ; word < num_term; word++){
 				   topic_count[topic] += term_topic_count[word][topic];
 			   }
-//			   cout << topic_count[topic] <<" ";
 		   }
-//		   cout << endl;
 
 
 		   for (int t = 0 ; t< MAX_THREAD ; t++ ){
@@ -263,6 +259,7 @@ int main(int argc, char* argv[]) {
 			    term_topic_thread[t] = term_topic_count;
 		   }
 
+		   durations[iter] = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
 	}
 
 	/**
@@ -270,13 +267,12 @@ int main(int argc, char* argv[]) {
 	 */
 
 	int output_size = 100;
-	cout << num_term <<endl;
 	vector<string> dictionary;
-	for (int t =0; t< num_term ; t++){
+	/*for (int t =0; t< num_term ; t++){
 		string term;
 		dict_stream >> term;
 		dictionary.push_back(term);
-	}
+	}*/
 
 	for (int k =0; k < num_topic ; k++){
 		vector<double> curr_topic = Phi[k];
@@ -284,7 +280,7 @@ int main(int argc, char* argv[]) {
 		for(int i =0 ; i<idx.size(); i++) idx[i] = i;
 		sort( idx.begin(), idx.end(), compare_index (curr_topic));
 		for (int i=0; i< output_size;i++){
-			topic_term << idx[i] <<":"<<dictionary[idx[i]] <<":"<<curr_topic[idx[i]] <<",";
+			topic_term << idx[i] <<":"<<curr_topic[idx[i]] <<",";
 		}
 		topic_term << endl;
 	}
@@ -304,8 +300,10 @@ int main(int argc, char* argv[]) {
 	perp << endl;
 
 
-
-
+	for(int i=0 ; i< max_iter;i++){
+		perp << durations[i] <<",";
+	}
+	perp << endl;
 
 	return 0;
 }

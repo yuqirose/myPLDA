@@ -19,6 +19,8 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <cstdio>
+#include <ctime>
 
 #include "Doc.h"
 
