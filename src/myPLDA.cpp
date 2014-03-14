@@ -49,7 +49,7 @@ struct compare_index
 
   bool operator () (int a, int b) const
   {
-    return (base_arr[a] < base_arr[b]);
+    return (base_arr[a] > base_arr[b]);
   }
 };
 
@@ -253,9 +253,9 @@ int main(int argc, char* argv[]) {
 			   for (int word= 0 ; word < num_term; word++){
 				   topic_count[topic] += term_topic_count[word][topic];
 			   }
-			   cout << topic_count[topic] <<" ";
+//			   cout << topic_count[topic] <<" ";
 		   }
-		   cout << endl;
+//		   cout << endl;
 
 
 		   for (int t = 0 ; t< MAX_THREAD ; t++ ){
@@ -270,12 +270,14 @@ int main(int argc, char* argv[]) {
 	 */
 
 	int output_size = 100;
-	vector<string> dictionary(num_term);
+	cout << num_term <<endl;
+	vector<string> dictionary;
 	for (int t =0; t< num_term ; t++){
 		string term;
 		dict_stream >> term;
 		dictionary.push_back(term);
 	}
+
 	for (int k =0; k < num_topic ; k++){
 		vector<double> curr_topic = Phi[k];
 		vector<int> idx(curr_topic.size());
