@@ -16,23 +16,27 @@ using namespace std;
 
 double cal_perplexity(vector <Doc> corpus, vector < vector<double> >  Theta, vector < vector<double> >  Phi,int num_doc, int num_topic){
 	double perplexity=0;
-
+	int ntest=0;
 	for (int d = 0; d< num_doc;d++){
 		Doc curr_doc = corpus[d];
 		vector<int> prob(num_topic);
 		vector<pair<int, int> >::iterator word_count_iter;
 		vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
 
-
+		
 		for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
+			double temp=0;
 			int word = word_count_iter ->first;
 			int count = word_count_iter ->second;
+			ntest+=count;
 			for( int k = 0; k < num_topic; k++){
-				perplexity+=Theta[d][k]*Phi[k][word]*count;
+				temp+=Theta[d][k]*Phi[k][word];
 			}
+			perplexity+=log(temp)*count;
+			//cout<<perplexity<<endl;
 		}
 	}
-	perplexity=exp(-log(perplexity)/num_doc);
+	perplexity=exp(-perplexity/ntest);
 	return perplexity;
 }
 
@@ -105,7 +109,8 @@ int main(int argc, char* argv[]) {
 	vector < vector<double> > Theta (num_doc, vector<double>(num_topic,0) );
 	vector < vector<double> > Phi (num_topic, vector<double>(num_term,0) );
 
-
+	num_doc=300;
+	
 	/** initialization
 	 *
 	 */
@@ -143,6 +148,7 @@ int main(int argc, char* argv[]) {
 		topic_thread[t] = topic_count;
 	}
 
+	
 
 //	for ( int k = 0; k < num_topic; k++)
 //		cout << term_topic_count[0][k] <<" ";
@@ -154,6 +160,31 @@ int main(int argc, char* argv[]) {
 	 */
     double perplexities [max_iter];
 	for(int iter =0 ; iter < max_iter ; iter ++) {
+		/**
+		* Read out parameters
+		*/
+		vector <int > doc_topic_sum (num_doc,0);
+		#pragma omp parallel for
+			for (int d =0; d< num_doc;d++){
+				for (int k = 0 ; k < num_topic; k++)
+					doc_topic_sum [d] += doc_topic_count [d][k];
+			}
+
+		#pragma omp parallel for
+			for (int d = 0; d< num_doc;d++){
+				for( int k = 0; k < num_topic; k++){
+					Theta[d][k] = (doc_topic_count [d][k] +alpha )/( (double) doc_topic_sum [d] + num_topic *alpha);
+				}
+			}
+
+		#pragma omp parallel for
+			for (int t= 0; t< num_term; t++){
+				for( int k = 0; k < num_topic; k++){
+					Phi[k][t] = (term_topic_count [t][k] +beta ) /((double) topic_count [k] + num_term *beta);
+				}
+			}
+
+		perplexities [iter] =cal_perplexity(corpus, Theta, Phi, num_doc,  num_topic);
 		#pragma omp parallel for
 		   for (int d = 0 ;  d<num_doc ; d++ ){
 			   Doc curr_doc = corpus[d];
@@ -217,31 +248,7 @@ int main(int argc, char* argv[]) {
 		   
 		   
 
-		   /**
-			* Read out parameters
-			*/
-			vector <int > doc_topic_sum (num_doc,0);
-					#pragma omp parallel for
-			for (int d =0; d< num_doc;d++){
-				for (int k = 0 ; k < num_topic; k++)
-					doc_topic_sum [d] += doc_topic_count [d][k];
-			}
-
-					#pragma omp parallel for
-			for (int d = 0; d< num_doc;d++){
-				for( int k = 0; k < num_topic; k++){
-					Theta[d][k] = doc_topic_count [d][k] /(double)doc_topic_sum [d];
-				}
-			}
-
-					#pragma omp parallel for
-			for (int t= 0; t< num_term; t++){
-				for( int k = 0; k < num_topic; k++){
-					Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
-				}
-			}
-
-			perplexities [iter] =cal_perplexity(corpus, Theta, Phi, num_doc,  num_topic);
+		   
 	}
 
 	/**
