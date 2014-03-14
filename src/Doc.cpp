@@ -65,15 +65,14 @@ int Doc::Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count
 			   sum_prob += prob[k];
 		   }
 
+		   if(sum_prob <0 ){
      	   cout << "sum_prob " << sum_prob << endl;
+		   }
 			   // normalize
 		   for ( int k = 0; k < num_topic ; k++){
 			   prob[k] =  prob[k] / sum_prob;
 		   }
 
-//		   for ( int k = 0; k < num_topic ; k++){
-//			   cout << prob[k] <<" ";
-//		   }
 		   return this->Gen_random_topic(prob,1, num_topic);
 }
 
