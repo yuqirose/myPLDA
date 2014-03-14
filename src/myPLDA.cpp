@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
 
 	for(int iter =0 ; iter < max_iter ; iter ++) {
 		#pragma omp parallel for
-		   for (int d = 0 ;  d< 10; d++ ){
+		   for (int d = 0 ;  d<num_doc ; d++ ){
 			   Doc curr_doc = corpus[d];
 			   vector<int> prob(num_topic);
 			   vector<pair<int, int> >::iterator word_count_iter;
@@ -204,7 +204,7 @@ int main(int argc, char* argv[]) {
 					Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
 				}
 			}
-
-		return 0;
+		}
+	return 0;
 }
 
