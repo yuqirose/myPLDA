@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 
 	// parameters
 	vector < vector<double> > Theta (num_doc, vector<double>(num_topic,0) );
-	vector < vector<double> > Phi (num_term, vector<double>(num_topic,0) );
+	vector < vector<double> > Phi (num_topic, vector<double>(num_term,0) );
 
 
 	/** initialization
@@ -123,7 +123,6 @@ int main(int argc, char* argv[]) {
 	 */
 
 	for(int iter =0 ; iter < max_iter ; iter ++) {
-		cout << "Iter:" << iter ;
 		#pragma omp parallel for
 		   for (int d = 0 ;  d<num_doc ; d++ ){
 			   Doc curr_doc = corpus[d];
@@ -159,10 +158,8 @@ int main(int argc, char* argv[]) {
 					}
 			   }
 			   corpus[d] = curr_doc;
-			   cout << " Doc:"<<d <<" ";
 
 		   }
-		   cout << endl;
 		   // sync up
 
 		   for ( int topic =0; topic < num_topic ; topic++ )
@@ -212,10 +209,6 @@ int main(int argc, char* argv[]) {
 			Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
 		}
 	}
-
-
-
-
 
 
 	return 0;
