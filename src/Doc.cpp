@@ -92,3 +92,4 @@ void Doc::Init_random_topic(int num_topic){
 
 }
 
+

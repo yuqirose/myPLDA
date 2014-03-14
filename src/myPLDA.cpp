@@ -14,19 +14,52 @@
 using namespace std;
 
 
+double cal_perplexity(vector <Doc> corpus, vector < vector<double> >  Theta, vector < vector<double> >  Phi,int num_doc, int num_topic){
+	double perplexity=0;
 
+	for (int d = 0; d< num_doc;d++){
+		Doc curr_doc = corpus[d];
+		vector<int> prob(num_topic);
+		vector<pair<int, int> >::iterator word_count_iter;
+		vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
+
+
+		for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
+			int word = word_count_iter ->first;
+			int count = word_count_iter ->second;
+			for( int k = 0; k < num_topic; k++){
+				perplexity+=Theta[d][k]*Phi[k][word]*count;
+			}
+		}
+	}
+	perplexity=exp(-log(perplexity)/num_doc);
+	return perplexity;
+}
+
+struct compare_index
+{
+  const vector < double >base_arr;
+    compare_index (vector < double >&arr):base_arr (arr)
+  {
+  }
+
+  bool operator () (int a, int b) const
+  {
+    return (base_arr[a] < base_arr[b]);
+  }
+};
 
 int main(int argc, char* argv[]) {
 
 	vector<Doc> corpus;
-//	string fname = "BagofWords/docword.kos.txt";
 	string fname = argv[1];
 	int max_iter = atoi(argv[2]);
-	int num_topic = atoi(argv[2]);;
+	int num_topic = atoi(argv[3]);;
 
 	int num_doc, num_term, num_word;
 	string topic_fname = "topics.txt";
 	string doctopic_fname = "doctopics.txt";
+	string perp_fname = "perplexity.txt";
 
 
 	ifstream bowData(fname.c_str());
@@ -51,7 +84,6 @@ int main(int argc, char* argv[]) {
     			break;
     	}
     	corpus.push_back(new_doc);
-//    	cout << d <<endl;
     }
 
 
@@ -61,7 +93,6 @@ int main(int argc, char* argv[]) {
 
 	double alpha = 0.1;    double beta =0.1;
 
-	//int num_thread;
 	vector< vector<int> > doc_topic_count(num_doc, vector<int>(num_topic,0));
 	vector< vector<int> > term_topic_count(num_term, vector<int>(num_topic,0));
 
@@ -121,10 +152,10 @@ int main(int argc, char* argv[]) {
 	/** Sampling
 	 *
 	 */
-
+    double perplexities [max_iter];
 	for(int iter =0 ; iter < max_iter ; iter ++) {
 		#pragma omp parallel for
-		   for (int d = 0 ;  d<num_doc ; d++ ){
+		   for (int d = 0 ;  d<3 ; d++ ){
 			   Doc curr_doc = corpus[d];
 			   vector<int> prob(num_topic);
 			   vector<pair<int, int> >::iterator word_count_iter;
@@ -183,57 +214,74 @@ int main(int argc, char* argv[]) {
 				topic_thread[t] = topic_count;
 			    term_topic_thread[t] = term_topic_count;
 		   }
-	}
 		   
 		   
-   /**
-	* Read out parameters
-	*/
-	vector <int > doc_topic_sum (num_doc,0);
-			#pragma omp parallel for
-	for (int d =0; d< num_doc;d++){
-		for (int k = 0 ; k < num_topic; k++)
-			doc_topic_sum [d] += doc_topic_count [d][k];
+
+		   /**
+			* Read out parameters
+			*/
+			vector <int > doc_topic_sum (num_doc,0);
+					#pragma omp parallel for
+			for (int d =0; d< num_doc;d++){
+				for (int k = 0 ; k < num_topic; k++)
+					doc_topic_sum [d] += doc_topic_count [d][k];
+			}
+
+					#pragma omp parallel for
+			for (int d = 0; d< num_doc;d++){
+				for( int k = 0; k < num_topic; k++){
+					Theta[d][k] = doc_topic_count [d][k] /(double)doc_topic_sum [d];
+				}
+			}
+
+					#pragma omp parallel for
+			for (int t= 0; t< num_term; t++){
+				for( int k = 0; k < num_topic; k++){
+					Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
+				}
+			}
+
+			perplexities [iter] =cal_perplexity(corpus, Theta, Phi, num_doc,  num_topic);
 	}
 
-			#pragma omp parallel for
-	for (int d = 0; d< num_doc;d++){
-		for( int k = 0; k < num_topic; k++){
-			Theta[d][k] = doc_topic_count [d][k] /(double)doc_topic_sum [d];
+	/**
+	 * Output the topics
+	 */
+	ofstream topic_term(topic_fname.c_str());
+	ofstream doc_topic (doctopic_fname.c_str());
+	ofstream perp (perp_fname.c_str());
+	int output_size = 100;
+	for (int k =0; k < num_topic ; k++){
+		vector<double> curr_topic = Phi[k];
+		vector<int> idx(curr_topic.size());
+		for(int i =0 ; i<idx.size(); i++) idx[i] = i;
+		sort( idx.begin(), idx.end(), compare_index (curr_topic));
+		for (int i=0; i< output_size;i++){
+			topic_term << idx[i] <<":"<<curr_topic[idx[i]] <<",";
 		}
+
+		topic_term << endl;
 	}
 
-			#pragma omp parallel for
-	for (int t= 0; t< num_term; t++){
-		for( int k = 0; k < num_topic; k++){
-			Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
+
+	for(int d=0; d< num_doc ;d++){
+		vector<double> curr_doc = Theta[d];
+		for(int k =0 ; k < num_topic; k++){
+			doc_topic << curr_doc[k] <<",";
 		}
+		doc_topic << endl;
 	}
+
+	for(int i=0 ; i< max_iter;i++){
+		perp << perplexities[i] <<",";
+	}
+	perp << endl;
+
+
+
 
 
 	return 0;
 }
 
-void cal_perplexity(vector <Doc> corpus, vector < vector<double> >  Theta, vector < vector<double> >  Phi,int num_doc, int num_topic){
-	double perplexity=0;
 
-	for (int d = 0; d< num_doc;d++){
-		Doc curr_doc = corpus[d];
-		vector<int> prob(num_topic);
-		vector<pair<int, int> >::iterator word_count_iter;
-		vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
-
-		int word_idx = 0;
-
-		for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
-			int word = word_count_iter ->first;
-			int count = word_count_iter ->second;
-			for( int k = 0; k < num_topic; k++){
-				perplexity+=Theta[d][k]*Phi[k][word]*count;
-			}
-		}
-	//
-	}
-	perplexity=exp(-log(perplexity)/num_doc);
-	//cout<<"perplexity "<< perplexity<<endl;
-}

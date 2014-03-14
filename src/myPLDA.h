@@ -18,6 +18,8 @@
 #include <gsl/gsl_randist.h>
 #include <vector>
 #include <algorithm>
+#include <numeric>
+
 #include "Doc.h"
 
 #define MAX_THREAD 20
