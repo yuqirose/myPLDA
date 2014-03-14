@@ -8,6 +8,7 @@
 
 //test
 #include <iostream>
+#include <math.h>
 #include "myPLDA.h"
 
 using namespace std;
@@ -25,7 +26,7 @@ int main(int argc, char* argv[]) {
 
 	int num_doc, num_term, num_word;
 	string topic_fname = "topics.txt";
-	string doctopic_fname = "doctopics.txt"
+	string doctopic_fname = "doctopics.txt";
 
 
 	ifstream bowData(fname.c_str());
@@ -36,7 +37,7 @@ int main(int argc, char* argv[]) {
     }
     else  cout << "Unable to open file";
 
-
+	num_doc=10;
 
     int docID, wordID, count;
     bowData >> docID >> wordID >> count;
@@ -204,6 +205,27 @@ int main(int argc, char* argv[]) {
 					Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
 				}
 			}
+			
+			double perplexity=0;
+			for (int d = 0; d< num_doc;d++){
+				Doc curr_doc = corpus[d];
+				vector<int> prob(num_topic);
+				vector<pair<int, int> >::iterator word_count_iter;
+				vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
+
+				int word_idx = 0;
+
+				for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
+					int word = word_count_iter ->first;
+					int count = word_count_iter ->second;
+					for( int k = 0; k < num_topic; k++){
+						perplexity+=Theta[d][k]*Phi[k][word]*count;
+					}
+				}
+//		
+			}
+			perplexity=exp(-log(perplexity)/num_doc);
+			//cout<<"perplexity "<< perplexity<<endl;
 		}
 	return 0;
 }
