@@ -68,6 +68,12 @@ int main(int argc, char* argv[]) {
 
 
 	ifstream bowData(fname.c_str());
+	ifstream dict_stream(dic_fname.c_str());
+	ofstream topic_term(topic_fname.c_str());
+	ofstream doc_topic (doctopic_fname.c_str());
+	ofstream perp (perp_fname.c_str());
+
+
     if(bowData.is_open ()){
 		bowData >> num_doc >> num_term >> num_word;
 	    cout << "num_doc: "<<num_doc<<" num_term: "<<num_term <<" num_word: "<< num_word << endl;
@@ -226,21 +232,30 @@ int main(int argc, char* argv[]) {
 		   }
 		   // sync up
 
-		   for ( int topic =0; topic < num_topic ; topic++ )
+		   for ( int topic =0; topic < num_topic ; topic++ ){
 			  for (int word= 0 ; word < num_term; word++){
 				   int temp=term_topic_count[word][topic];
 				   term_topic_count[word][topic]=0;
-				   for (int t = 0 ; t< MAX_THREAD ; t++ )
-				   term_topic_count[word][topic] += term_topic_thread[t][word][topic] ;
-			   term_topic_count[word][topic]=term_topic_count[word][topic]+(1- MAX_THREAD)*temp;
+				   for (int t = 0 ; t< MAX_THREAD ; t++ ){
+					   term_topic_count[word][topic] += term_topic_thread[t][word][topic] ;
+				   }
+				   term_topic_count[word][topic]=term_topic_count[word][topic]+(1- MAX_THREAD)*temp;
+//				   topic_term <<  term_topic_count[word][topic] <<",";
 			   }
+
+//			  topic_term << endl;
+		   }
+//		   topic_term <<endl<<endl;
 
 		   // combine the topics
 		   for (int topic = 0; topic < num_topic ;topic++){
 			   topic_count[topic] =0;
-			   for (int word= 0 ; word < num_term; word++)
+			   for (int word= 0 ; word < num_term; word++){
 				   topic_count[topic] += term_topic_count[word][topic];
+			   }
+			   cout << topic_count[topic] <<" ";
 		   }
+		   cout << endl;
 
 
 		   for (int t = 0 ; t< MAX_THREAD ; t++ ){
@@ -253,11 +268,6 @@ int main(int argc, char* argv[]) {
 	/**
 	 * Output the topics
 	 */
-	ofstream topic_term(topic_fname.c_str());
-	ofstream doc_topic (doctopic_fname.c_str());
-	ofstream perp (perp_fname.c_str());
-	ifstream dict_stream(dic_fname.c_str());
-
 
 	int output_size = 100;
 	vector<string> dictionary(num_term);
@@ -274,7 +284,6 @@ int main(int argc, char* argv[]) {
 		for (int i=0; i< output_size;i++){
 			topic_term << idx[i] <<":"<<dictionary[idx[i]] <<":"<<curr_topic[idx[i]] <<",";
 		}
-
 		topic_term << endl;
 	}
 

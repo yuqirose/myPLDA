@@ -24,7 +24,28 @@ void Doc::Add_pair(int wordID, int count){
 	this->num_word += count;
 
 }
+int Doc::Gen_random_topic2(double prob[], int N, int K){
+		 double prob_acc [K];
 
+
+		  double u = rand()/((double)RAND_MAX);
+
+		  prob_acc[0]=prob[0];
+		  for (int k = 1; k < K; k++){
+		  			prob_acc[k]=prob[k]+prob_acc[k-1];
+		  }
+
+
+		  for (int n = 0; n<N; n++ ){
+			  for (int k = 0; k < K; k++){
+			    if (u<=prob_acc[k] ){
+			    	return k;
+				  }
+			  }
+		  }
+		  return -1;
+
+}
 int Doc::Gen_random_topic(double prob[], int N, int num_topic){
 
 		int result = 0;
@@ -45,8 +66,10 @@ int Doc::Gen_random_topic(double prob[], int N, int num_topic){
 		gsl_ran_multinomial (r, num_topic, N, prob_in,rand_topic);
 
 		for (int k = 0; k < num_topic; k++){
-		   if (rand_topic[k] ==1)
+		   if (rand_topic[k] ==1){
 			   return k;
+		   }
+
 		}
 
 		return 0;
@@ -74,7 +97,7 @@ int Doc::Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count
 			   prob[k] =  prob[k] / sum_prob;
 		   }
 
-		   return this->Gen_random_topic(prob,1, num_topic);
+		   return this->Gen_random_topic2(prob,1, num_topic);
 }
 
 void Doc::Init_random_topic(int num_topic){

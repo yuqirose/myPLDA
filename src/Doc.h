@@ -67,14 +67,11 @@ public:
 
 
 	int Gen_random_topic(double prob[], int N , int num_topic);
+	int Gen_random_topic2(double prob[], int N, int num_topic);
 
 	void Init_random_topic(int num_topic);
 
 	int Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count, vector <int> topic_count, int alpha, int beta);
-
-
-
-
 
 };
 
