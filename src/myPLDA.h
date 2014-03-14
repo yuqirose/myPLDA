@@ -17,6 +17,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <vector>
+#include <algorithm>
 #include "Doc.h"
 
 #define MAX_THREAD 20

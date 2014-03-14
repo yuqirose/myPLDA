@@ -24,6 +24,8 @@ int main(int argc, char* argv[]) {
 	int num_topic = atoi(argv[2]);;
 
 	int num_doc, num_term, num_word;
+	string topic_fname = "topics.txt";
+	string doctopic_fname = "doctopics.txt"
 
 
 	ifstream bowData(fname.c_str());
@@ -69,7 +71,7 @@ int main(int argc, char* argv[]) {
 
 	// parameters
 	vector < vector<double> > Theta (num_doc, vector<double>(num_topic,0) );
-	vector < vector<double> > Phi (num_term, vector<double>(num_topic,0) );
+	vector < vector<double> > Phi (num_topic, vector<double>(num_term,0) );
 
 
 	/** initialization
@@ -200,9 +202,17 @@ int main(int argc, char* argv[]) {
 	#pragma omp parallel for
 	for (int t= 0; t< num_term; t++){
 		for( int k = 0; k < num_topic; k++){
-			Phi[t][k] = term_topic_count [t][k] /(double) topic_count [k];
+			Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
 		}
 	}
+
+
+	/** Output files */
+	 for (int k = 0;  k < num_topic;  k++){
+		 sort (Phi[k].begin(), myvector.begin()
+	 }
+
+
 
 
 
