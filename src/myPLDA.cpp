@@ -233,9 +233,9 @@ int main(int argc, char* argv[]) {
 
 		   }
 		   // sync up
-
-		   for ( int topic =0; topic < num_topic ; topic++ ){
-			  for (int word= 0 ; word < num_term; word++){
+			#pragma omp parallel for
+		   for (int word= 0 ; word < num_term; word++){
+		   	   for ( int topic =0; topic < num_topic ; topic++ ){
 				   int temp=term_topic_count[word][topic];
 				   term_topic_count[word][topic]=0;
 				   for (int t = 0 ; t< MAX_THREAD ; t++ ){
@@ -268,8 +268,8 @@ int main(int argc, char* argv[]) {
 	 */
 
 	int output_size = 100;
-	vector<string> dictionary;
-	/*for (int t =0; t< num_term ; t++){
+	/*vector<string> dictionary;
+	for (int t =0; t< num_term ; t++){
 		string term;
 		dict_stream >> term;
 		dictionary.push_back(term);
