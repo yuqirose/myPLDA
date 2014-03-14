@@ -155,7 +155,7 @@ int main(int argc, char* argv[]) {
     double perplexities [max_iter];
 	for(int iter =0 ; iter < max_iter ; iter ++) {
 		#pragma omp parallel for
-		   for (int d = 0 ;  d<3 ; d++ ){
+		   for (int d = 0 ;  d<num_doc ; d++ ){
 			   Doc curr_doc = corpus[d];
 			   vector<int> prob(num_topic);
 			   vector<pair<int, int> >::iterator word_count_iter;
