@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
 
 	// parameters
 	vector < vector<double> > Theta (num_doc, vector<double>(num_topic,0) );
-	vector < vector<double> > Phi (num_topic, vector<double>(num_term,0) );
+	vector < vector<double> > Phi (num_term, vector<double>(num_topic,0) );
 
 
 	/** initialization
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
 			#pragma omp parallel for
 			for (int t= 0; t< num_term; t++){
 				for( int k = 0; k < num_topic; k++){
-					Phi[t][k] = term_topic_count [t][k] /(double) topic_count [k];
+					Phi[k][t] = term_topic_count [t][k] /(double) topic_count [k];
 				}
 			}
 
