@@ -64,6 +64,7 @@ int main(int argc, char* argv[]) {
 	string topic_fname = "topics.txt";
 	string doctopic_fname = "doctopics.txt";
 	string perp_fname = "perplexity.txt";
+	string dic_fname = "BagofWords/vocab.kos.txt";
 
 
 	ifstream bowData(fname.c_str());
@@ -80,6 +81,7 @@ int main(int argc, char* argv[]) {
     bowData >> docID >> wordID >> count;
     for(int d = 1; d <= num_doc ; d++){
     	Doc new_doc = Doc(docID);
+    	new_doc.Set_num_term(num_term);
     	while(d == docID){
     		new_doc.Add_pair(wordID,count);
     		if(!bowData.eof())
@@ -95,7 +97,7 @@ int main(int argc, char* argv[]) {
 
 
 
-	double alpha = 0.1;    double beta =0.1;
+	double alpha = 1;    double beta =1;
 
 	vector< vector<int> > doc_topic_count(num_doc, vector<int>(num_topic,0));
 	vector< vector<int> > term_topic_count(num_term, vector<int>(num_topic,0));
@@ -109,7 +111,7 @@ int main(int argc, char* argv[]) {
 	vector < vector<double> > Theta (num_doc, vector<double>(num_topic,0) );
 	vector < vector<double> > Phi (num_topic, vector<double>(num_term,0) );
 
-	num_doc=300;
+	num_doc=20;
 	
 	/** initialization
 	 *
@@ -230,7 +232,7 @@ int main(int argc, char* argv[]) {
 				   term_topic_count[word][topic]=0;
 				   for (int t = 0 ; t< MAX_THREAD ; t++ )
 				   term_topic_count[word][topic] += term_topic_thread[t][word][topic] ;
-			   term_topic_count[word][topic]=term_topic_count[word][topic]+(1-    MAX_THREAD)*temp;
+			   term_topic_count[word][topic]=term_topic_count[word][topic]+(1- MAX_THREAD)*temp;
 			   }
 
 		   // combine the topics
@@ -245,10 +247,7 @@ int main(int argc, char* argv[]) {
 				topic_thread[t] = topic_count;
 			    term_topic_thread[t] = term_topic_count;
 		   }
-		   
-		   
 
-		   
 	}
 
 	/**
@@ -257,14 +256,23 @@ int main(int argc, char* argv[]) {
 	ofstream topic_term(topic_fname.c_str());
 	ofstream doc_topic (doctopic_fname.c_str());
 	ofstream perp (perp_fname.c_str());
+	ifstream dict_stream(dic_fname.c_str());
+
+
 	int output_size = 100;
+	vector<string> dictionary(num_term);
+	for (int t =0; t< num_term ; t++){
+		string term;
+		dict_stream >> term;
+		dictionary.push_back(term);
+	}
 	for (int k =0; k < num_topic ; k++){
 		vector<double> curr_topic = Phi[k];
 		vector<int> idx(curr_topic.size());
 		for(int i =0 ; i<idx.size(); i++) idx[i] = i;
 		sort( idx.begin(), idx.end(), compare_index (curr_topic));
 		for (int i=0; i< output_size;i++){
-			topic_term << idx[i] <<":"<<curr_topic[idx[i]] <<",";
+			topic_term << idx[i] <<":"<<dictionary[idx[i]] <<":"<<curr_topic[idx[i]] <<",";
 		}
 
 		topic_term << endl;

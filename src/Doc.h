@@ -16,6 +16,7 @@ class Doc {
 private:
 	int doc_ID;
 	int num_word;
+	int num_term;
 	vector<pair<int, int> > bag_of_words;
 //	vector< vector <int> > term_topic_count;
 //	vector<int> topic_count;
@@ -36,6 +37,9 @@ public:
 
 	void Set_docID(int docID){
 		this->doc_ID = docID;
+	}
+	void Set_num_term (int value){
+		this->num_term  = value;
 	}
 
 

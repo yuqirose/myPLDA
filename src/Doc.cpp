@@ -56,12 +56,13 @@ int Doc::Sample_topic (vector<int> doc_topic_count, vector<int> term_topic_count
 		   double sum_prob=0;
 
 		   int num_topic = doc_topic_count.size();
+
 		   double prob[num_topic];
 
 
 		   for ( int k = 0; k < num_topic ; k++){
 			   prob[k] = (alpha +(double)doc_topic_count[k])*(beta + (double)term_topic_count[k]);
-			   prob[k]  = prob[k] /(num_topic * beta+ (double)topic_count[k]);
+			   prob[k]  = prob[k] /(this->num_term * beta+ (double)topic_count[k]);
 			   sum_prob += prob[k];
 		   }
 
