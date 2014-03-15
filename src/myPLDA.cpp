@@ -162,11 +162,12 @@ int main(int argc, char* argv[]) {
 	 */
     double perplexities [max_iter];
     double durations [max_iter];
-    std::clock_t start;
-	for(int iter =0 ; iter < max_iter ; iter ++) {
-		cout << "Iter "<<iter;
+    struct timeval start, end;
 
-		 start = std::clock();
+	for(int iter =0 ; iter < max_iter ; iter ++) {
+		int num_thread;
+		cout << "Iter "<<iter;
+		gettimeofday(&start, NULL);
 
 		/**
 		* Read out parameters
@@ -200,7 +201,7 @@ int main(int argc, char* argv[]) {
 			   vector<pair<int, int> >::iterator word_count_iter;
 			   vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
 
-			   int  num_thread = omp_get_thread_num();
+			   num_thread = omp_get_thread_num();
 			   int word_idx = 0;
 			   for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
 					int word = word_count_iter ->first;
@@ -259,8 +260,10 @@ int main(int argc, char* argv[]) {
 			    term_topic_thread[t] = term_topic_count;
 		   }
 
-		   durations[iter] = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
-		   cout << " time "<< durations[iter] << endl;
+		   gettimeofday(&end, NULL);
+
+		   durations[iter]  = ((end.tv_sec  - start.tv_sec) * 1000000u + end.tv_usec - start.tv_usec) / 1.e6;
+		   cout << " time "<< durations[iter]<< endl;
 	}
 
 	/**
@@ -280,30 +283,34 @@ int main(int argc, char* argv[]) {
 		vector<int> idx(curr_topic.size());
 		for(int i =0 ; i<idx.size(); i++) idx[i] = i;
 		sort( idx.begin(), idx.end(), compare_index (curr_topic));
-		for (int i=0; i< output_size;i++){
+		for (int i=0; i< output_size-1;i++){
 			topic_term << idx[i] <<":"<<curr_topic[idx[i]] <<",";
 		}
+		topic_term << idx[output_size-1] <<":"<<curr_topic[idx[output_size-1]];
 		topic_term << endl;
 	}
 
 
 	for(int d=0; d< num_doc ;d++){
 		vector<double> curr_doc = Theta[d];
-		for(int k =0 ; k < num_topic; k++){
+		for(int k =0 ; k < num_topic-1; k++){
 			doc_topic << curr_doc[k] <<",";
 		}
+		doc_topic << curr_doc[num_topic-1];
 		doc_topic << endl;
 	}
 
-	for(int i=0 ; i< max_iter;i++){
+	for(int i=0 ; i< max_iter-1;i++){
 		perp << perplexities[i] <<",";
 	}
+	perp << perplexities[max_iter-1];
 	perp << endl;
 
 
-	for(int i=0 ; i< max_iter;i++){
+	for(int i=0 ; i< max_iter-1;i++){
 		perp << durations[i] <<",";
 	}
+	perp << perplexities[max_iter-1] ;
 	perp << endl;
 
 	return 0;

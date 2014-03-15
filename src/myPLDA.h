@@ -21,6 +21,7 @@
 #include <numeric>
 #include <cstdio>
 #include <ctime>
+#include<sys/time.h>
 
 #include "Doc.h"
 
