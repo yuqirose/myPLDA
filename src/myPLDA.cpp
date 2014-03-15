@@ -58,7 +58,8 @@ int main(int argc, char* argv[]) {
 	vector<Doc> corpus;
 	string fname = argv[1];
 	int max_iter = atoi(argv[2]);
-	int num_topic = atoi(argv[3]);;
+	int num_topic = atoi(argv[3]);
+	int num_thread;
 
 	int num_doc, num_term, num_word;
 	string topic_fname = "topics.txt";
@@ -172,20 +173,20 @@ int main(int argc, char* argv[]) {
 		* Read out parameters
 		*/
 		vector <int > doc_topic_sum (num_doc,0);
-		#pragma omp parallel for
+//		#pragma omp parallel for
 			for (int d =0; d< num_doc;d++){
 				for (int k = 0 ; k < num_topic; k++)
 					doc_topic_sum [d] += doc_topic_count [d][k];
 			}
 
-		#pragma omp parallel for
+//		#pragma omp parallel for
 			for (int d = 0; d< num_doc;d++){
 				for( int k = 0; k < num_topic; k++){
 					Theta[d][k] = (doc_topic_count [d][k] +alpha )/( (double) doc_topic_sum [d] + num_topic *alpha);
 				}
 			}
 
-		#pragma omp parallel for
+//		#pragma omp parallel for
 			for (int t= 0; t< num_term; t++){
 				for( int k = 0; k < num_topic; k++){
 					Phi[k][t] = (term_topic_count [t][k] +beta ) /((double) topic_count [k] + num_term *beta);
@@ -200,7 +201,7 @@ int main(int argc, char* argv[]) {
 			   vector<pair<int, int> >::iterator word_count_iter;
 			   vector<pair<int, int> > bagofwords =curr_doc.Get_bagofwords();
 
-			   int  num_thread = omp_get_thread_num();
+			   int num_thread = omp_get_thread_num();
 			   int word_idx = 0;
 			   for(word_count_iter= bagofwords.begin(); word_count_iter!=bagofwords.end(); ++word_count_iter){
 					int word = word_count_iter ->first;
@@ -233,7 +234,7 @@ int main(int argc, char* argv[]) {
 
 		   }
 		   // sync up
-			#pragma omp parallel for
+//			#pragma omp parallel for
 		   for (int word= 0 ; word < num_term; word++){
 		   	   for ( int topic =0; topic < num_topic ; topic++ ){
 				   int temp=term_topic_count[word][topic];
